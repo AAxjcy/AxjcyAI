@@ -9,7 +9,7 @@
 using namespace std;
 
 extern "C"{
-AAI_DLL_EXPORT int auto_command(int flags,double *X1,double *X2,double *X3,double *Y,int *which){
+AAI_DLL_EXPORT int in_picture(int flags,double *X1,double *X2,double *X3,double *Y,int *which){
     srand(time(0));static int status=0;
     static aai_queue *first_data=new aai_queue[FIRST_NUMBER];
     static aai_queue *output_data=new aai_queue[OUTPUT_NUMBER];
@@ -18,7 +18,7 @@ AAI_DLL_EXPORT int auto_command(int flags,double *X1,double *X2,double *X3,doubl
         case AAI_FLAGS_INIT:{
             if(status)return AAI_STATUS_REPEAT_INIT;
             status=1;
-            FILE* f_in=fopen("module/auto_command/from_main.aad","r");
+            FILE* f_in=fopen("module/in_picture/from_main.aad","r");
             int n=FIRST_NUMBER,m=MAIN_SECOND_NUMBER;
             from_main=new double *[n];
             for(int i=0;i<n;i++)from_main[i]=new double[m];
@@ -28,7 +28,7 @@ AAI_DLL_EXPORT int auto_command(int flags,double *X1,double *X2,double *X3,doubl
                 for(int i=0;i<n;i++)for(int j=0;j<m;j++)fscanf(f_in,"%lf",&from_main[i][j]);
                 fclose(f_in);
             }
-            f_in=fopen("module/auto_command/first_to_first.aad","r");
+            f_in=fopen("module/in_picture/first_to_first.aad","r");
             n=FIRST_NUMBER,m=FIRST_NUMBER;
             first_to_first=new double *[n];
             for(int i=0;i<n;i++)first_to_first[i]=new double[m];
@@ -38,7 +38,7 @@ AAI_DLL_EXPORT int auto_command(int flags,double *X1,double *X2,double *X3,doubl
                 for(int i=0;i<n;i++)for(int j=0;j<m;j++)fscanf(f_in,"%lf",&first_to_first[i][j]);
                 fclose(f_in);
             }
-            f_in=fopen("module/auto_command/first_to_output.aad","r");
+            f_in=fopen("module/in_picture/first_to_output.aad","r");
             n=OUTPUT_NUMBER,m=FIRST_NUMBER;
             first_to_output=new double *[n];
             for(int i=0;i<n;i++)first_to_output[i]=new double[m];
@@ -48,7 +48,7 @@ AAI_DLL_EXPORT int auto_command(int flags,double *X1,double *X2,double *X3,doubl
                 for(int i=0;i<n;i++)for(int j=0;j<m;j++)fscanf(f_in,"%lf",&first_to_output[i][j]);
                 fclose(f_in);
             }
-            f_in=fopen("module/auto_command/first_data.aad","r");
+            f_in=fopen("module/in_picture/first_data.aad","r");
             n=FIRST_NUMBER;
             int tim;double value;
             if(!f_in)for(int i=0;i<n;i++){
@@ -64,7 +64,7 @@ AAI_DLL_EXPORT int auto_command(int flags,double *X1,double *X2,double *X3,doubl
                 }
                 fclose(f_in);
             }
-            f_in=fopen("module/auto_command/output_data.aad","r");
+            f_in=fopen("module/in_picture/output_data.aad","r");
             n=OUTPUT_NUMBER;
             if(!f_in)for(int i=0;i<n;i++){
                 tim=rand()%100+1;
@@ -85,28 +85,28 @@ AAI_DLL_EXPORT int auto_command(int flags,double *X1,double *X2,double *X3,doubl
             break;
         }
         case AAI_FLAGS_FINISH:{
-            FILE* f_out=fopen("module/auto_command/from_main.aad","w");
+            FILE* f_out=fopen("module/in_picture/from_main.aad","w");
             int n=FIRST_NUMBER,m=MAIN_SECOND_NUMBER;
             for(int i=0;i<n;i++){
                 for(int j=0;j<m;j++)fprintf(f_out,"%lf ",from_main[i][j]);
                 fprintf(f_out,"\n");
             }
             fclose(f_out);
-            f_out=fopen("module/auto_command/first_to_first.aad","w");
+            f_out=fopen("module/in_picture/first_to_first.aad","w");
             n=FIRST_NUMBER,m=FIRST_NUMBER;
             for(int i=0;i<n;i++){
                 for(int j=0;j<m;j++)fprintf(f_out,"%lf ",first_to_first[i][j]);
                 fprintf(f_out,"\n");
             }
             fclose(f_out);
-            f_out=fopen("module/auto_command/first_to_output.aad","w");
+            f_out=fopen("module/in_picture/first_to_output.aad","w");
             n=OUTPUT_NUMBER,m=FIRST_NUMBER;
             for(int i=0;i<n;i++){
                 for(int j=0;j<m;j++)fprintf(f_out,"%lf ",first_to_output[i][j]);
                 fprintf(f_out,"\n");
             }
             fclose(f_out);
-            f_out=fopen("module/auto_command/first_data.aad","w");
+            f_out=fopen("module/in_picture/first_data.aad","w");
             n=FIRST_NUMBER;
             int tim;
             for(int i=0;i<n;i++){
@@ -115,7 +115,7 @@ AAI_DLL_EXPORT int auto_command(int flags,double *X1,double *X2,double *X3,doubl
                 fprintf(f_out,"\n");
             }
             fclose(f_out);
-            f_out=fopen("module/auto_command/output_data.aad","w");
+            f_out=fopen("module/in_picture/output_data.aad","w");
             n=OUTPUT_NUMBER;
             for(int i=0;i<n;i++){
                 fprintf(f_out,"%d ",(tim=output_data[i].time_length()));

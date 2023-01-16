@@ -1,8 +1,10 @@
+//Use_"//"_to_comment,no_spaces
+
 auto_command
-in_picture
-in_sound
-in_string
-memory
-out_command
-out_sound
-out_string
+//in_picture
+//in_sound
+//in_string
+//memory
+//out_command
+//out_sound
+//out_string
