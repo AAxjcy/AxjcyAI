@@ -52,15 +52,47 @@ void finish(){
     for(int i=0;i<num_modules;i++)delete[] all_modules[i];
     delete[] all_modules;delete[] modules_func;
 }
+void err_print(int status){
+    switch(status){
+        case AAI_STATUS_SUCCESS:return;
+        case AAI_STATUS_REPEAT_INIT:
+            puts("error:重复初始化");
+            break;
+        case AAI_STATUS_FULL_QUEUE:
+            puts("error:神经元满队列");
+            break;
+        case AAI_STATUS_NULL_QUEUE:
+            puts("error:对空神经元进行操作");
+            break;
+        case AAI_STATUS_NO_MODULE:
+            puts("error:找不到module/module.aad");
+            break;
+        case AAI_STATUS_NO_DLL:
+            puts("error:找不到dll");
+            break;
+        case AAI_STATUS_NO_FUNCTION:
+            puts("error:找不到函数");
+            break;
+        case AAI_STATUS_ADJUST_FAILED:
+            puts("error:自动调节失败");
+            break;
+    }
+}
 int main(){
-    int xxx=init();
-    for(int i=0;i<num_modules;i++)puts(all_modules[i]);
-    if(xxx){
-        cout<<xxx<<endl;
+    int status=init();
+    if(status){
+        err_print(status);
         system("pause");
         return 0;
     }
-    atexit(finish);
+    for(int i=0;i<num_modules;i++)puts(all_modules[i]);
+    double *X=new double[3];int which;
+    X[0]=X[1]=X[2]=1;
+    (*modules_func)(AAI_FLAGS_COMPUTE,NULL,X,NULL,NULL,&which);
+    cout<<which<<endl;
+    delete[] X;
+    // atexit(finish);
+    finish();
     system("pause");
     return 0;
 }
