@@ -35,8 +35,9 @@
 #define AAI_COMPUTE_THIRD 3
 
 #define MAX_TIME 100
+#define MAX_INIT_WEIGHT 10
 #define MAX_LENGTH 200
-#define SCALING_RATIO 10000
+#define SCALING_RATIO 100
 
 typedef class AAI_QUEUE{
 public:
@@ -95,5 +96,7 @@ private:
         return t-need*SCALING_RATIO;
     }
 }aai_queue;
+
+double sigma(double x){return 1/(1+exp(-x));}
 
 #endif

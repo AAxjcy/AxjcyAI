@@ -26,7 +26,7 @@ AAI_DLL_EXPORT int auto_command(int flags,double *X1,double *X2,double *X3,doubl
             from_main=new double *[n];
             for(int i=0;i<n;i++)from_main[i]=new double[m];
             if(!f_in)for(int i=0;i<n;i++)for(int j=0;j<m;j++)
-                from_main[i][j]=rand()%21-10;
+                from_main[i][j]=rand()%(2*MAX_INIT_WEIGHT+1)-MAX_INIT_WEIGHT;
             else{
                 for(int i=0;i<n;i++)for(int j=0;j<m;j++)fscanf(f_in,"%lf",&from_main[i][j]);
                 fclose(f_in);
@@ -36,7 +36,7 @@ AAI_DLL_EXPORT int auto_command(int flags,double *X1,double *X2,double *X3,doubl
             first_to_first=new double *[n];
             for(int i=0;i<n;i++)first_to_first[i]=new double[m];
             if(!f_in)for(int i=0;i<n;i++)for(int j=0;j<m;j++)
-                first_to_first[i][j]=rand()%21-10;
+                first_to_first[i][j]=rand()%(2*MAX_INIT_WEIGHT+1)-MAX_INIT_WEIGHT;
             else{
                 for(int i=0;i<n;i++)for(int j=0;j<m;j++)fscanf(f_in,"%lf",&first_to_first[i][j]);
                 fclose(f_in);
@@ -46,7 +46,7 @@ AAI_DLL_EXPORT int auto_command(int flags,double *X1,double *X2,double *X3,doubl
             first_to_output=new double *[n];
             for(int i=0;i<n;i++)first_to_output[i]=new double[m];
             if(!f_in)for(int i=0;i<n;i++)for(int j=0;j<m;j++)
-                first_to_output[i][j]=rand()%21-10;
+                first_to_output[i][j]=rand()%(2*MAX_INIT_WEIGHT+1)-MAX_INIT_WEIGHT;
             else{
                 for(int i=0;i<n;i++)for(int j=0;j<m;j++)fscanf(f_in,"%lf",&first_to_output[i][j]);
                 fclose(f_in);
@@ -55,7 +55,7 @@ AAI_DLL_EXPORT int auto_command(int flags,double *X1,double *X2,double *X3,doubl
             n=FIRST_NUMBER;
             int tim;double value;
             if(!f_in)for(int i=0;i<n;i++){
-                tim=rand()%100+1;
+                tim=rand()%MAX_TIME+1;
                 for(int j=0;j<tim;j++)first_data[i].push(0);
             }else{
                 for(int i=0;i<n;i++){
@@ -70,7 +70,7 @@ AAI_DLL_EXPORT int auto_command(int flags,double *X1,double *X2,double *X3,doubl
             f_in=fopen("module/auto_command/output_data.aad","r");
             n=OUTPUT_NUMBER;
             if(!f_in)for(int i=0;i<n;i++){
-                tim=rand()%100+1;
+                tim=rand()%MAX_TIME+1;
                 for(int j=0;j<tim;j++)output_data[i].push(0);
             }else{
                 for(int i=0;i<n;i++){
@@ -91,13 +91,13 @@ AAI_DLL_EXPORT int auto_command(int flags,double *X1,double *X2,double *X3,doubl
             for(int i=0;i<n;i++)first_X[i]=first_data[i].pop(NULL)+(first_Y[i]=0);
             for(int i=0;i<n;i++)for(int j=0;j<m;j++)first_Y[i]+=from_main[i][j]*X2[j];
             for(int i=0;i<n;i++)for(int j=0;j<m;j++)first_Y[i]+=first_to_first[i][j]*first_X[j];
-            for(int i=0;i<n;i++)first_data[i].push(first_Y[i]);
+            for(int i=0;i<n;i++)first_data[i].push(sigma(first_Y[i]));
             n=OUTPUT_NUMBER,m=FIRST_NUMBER;
             double *output_X=new double [n],*output_Y=new double [n];
             for(int i=0;i<n;i++)output_X[i]=output_data[i].pop(NULL)+(output_Y[i]=0);
             for(int i=0;i<n;i++)for(int j=0;j<m;j++)output_Y[i]+=first_to_output[i][j]*first_X[j];
             status=auto_adjust(output_X[0]);
-            for(int i=0;i<n;i++)output_data[i].push(output_Y[i]);
+            for(int i=0;i<n;i++)output_data[i].push(sigma(output_Y[i]));
             delete[] first_X;delete[] output_X;
             delete[] first_Y;delete[] output_Y;
             break;
