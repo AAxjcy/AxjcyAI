@@ -1,10 +1,13 @@
 #include"include/universal.hpp"
 #include<windows.h>
 using namespace std;
-typedef int (*func_point)(int flags,double *X1,double *X2,double *X3,double *Y,int *which);
 char **all_modules;int num_modules=0;
 func_point *modules_func;
 int init(){
+    aai_queue::init();
+    // aai_queue::decay_pow=new double[MAX_TIME];
+    // aai_queue::decay_pow[0]=1;
+    // for(int t=1;t<MAX_TIME;t++)aai_queue::decay_pow[t]=aai_queue::decay_pow[t-1]*(1-DECAY_RATE);
     FILE *f_in=fopen("module/module.aad","r");
     if(!f_in)return AAI_STATUS_NO_MODULE;
     int len;int n=0;
@@ -41,16 +44,18 @@ int init(){
             delete[] reg;
             return AAI_STATUS_NO_FUNCTION;
         }
-        (*modules_func[i])(AAI_FLAGS_INIT,NULL,NULL,NULL,NULL,NULL);
+        (*modules_func[i])(AAI_FLAGS_INIT,NULL,NULL,NULL,NULL,NULL,NULL,0);
     }
     delete[] reg;
     return AAI_STATUS_SUCCESS;
 }
 void finish(){
     for(int i=0;i<num_modules;i++)
-        (*modules_func[i])(AAI_FLAGS_FINISH,NULL,NULL,NULL,NULL,NULL);
+        (*modules_func[i])(AAI_FLAGS_FINISH,NULL,NULL,NULL,NULL,NULL,NULL,0);
     for(int i=0;i<num_modules;i++)delete[] all_modules[i];
     delete[] all_modules;delete[] modules_func;
+    aai_queue::finish();
+    // delete[] aai_queue::decay_pow;
 }
 void err_print(int status){
     switch(status){
@@ -79,20 +84,42 @@ void err_print(int status){
     }
 }
 int main(){
-    int status=init();
+    int xxx;
+    cin>>xxx;
+    int status;{
+        status=init();
+        atexit(finish);
+    }
     if(status){
         err_print(status);
         system("pause");
         return 0;
     }
     for(int i=0;i<num_modules;i++)puts(all_modules[i]);
-    double *X=new double[3];int which;
-    X[0]=X[1]=X[2]=1;
-    (*modules_func)(AAI_FLAGS_COMPUTE,NULL,X,NULL,NULL,&which);
-    cout<<which<<endl;
-    delete[] X;
-    // atexit(finish);
-    finish();
+    double *X=new double[100];int which;aai_queue *main2=new aai_queue[100];
+    for(int i=0;i<100;i++)X[i]=0;X[0]=X[1]=X[2]=1;
+    for(int i=0;i<100;i++)main2[i].push(X[i]);
+    // main2[0].print();
+    // cout<<main2[0].value_top(NULL)<<endl;
+    // cout<<main2<<endl;
+    // cout<<"<<<<<<<<<<<<<<<<<<<<<"<<endl;
+    if(xxx==0){
+        // cout<<123<<endl;
+        for(int i=0;i<1000;i++)
+            (*modules_func[0])(AAI_FLAGS_COMPUTE,NULL,main2,NULL,NULL,&which,modules_func,num_modules);
+    // cout<<"<<<<<<<<<<<<<<<<<<<<<"<<endl;
+    }
+    else if(xxx==1){
+        (*modules_func[0])(AAI_FLAGS_PUNISH,NULL,main2,NULL,NULL,NULL,NULL,0);
+        // cout<<456<<endl;
+    }
+    else if(xxx==2){
+        (*modules_func[0])(AAI_FLAGS_REWARD,NULL,main2,NULL,NULL,NULL,NULL,0);
+        // cout<<456<<endl;
+    }
+    else aai_queue::pp();
+    delete[] X;delete[] main2;
+    // finish();
     system("pause");
     return 0;
 }
