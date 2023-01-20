@@ -134,8 +134,8 @@ private:
         int need=t/SCALING_RATIO;need=std::min(need,time_length());
         if(need){
             double sum=0,x;
-            for(int i=0;i<need;i++){x=pop_queue();sum+=x*x;}
-            push_top(sqrt(sum));
+            for(int i=0;i<need;i++){x=pop_queue();sum+=x;}
+            push_top(sum/need);
         }
         return t-need*SCALING_RATIO;
     }

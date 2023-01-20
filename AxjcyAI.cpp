@@ -95,31 +95,30 @@ int main(){
         system("pause");
         return 0;
     }
-    for(int i=0;i<num_modules;i++)puts(all_modules[i]);
-    double *X=new double[100];int which;aai_queue *main2=new aai_queue[100];
-    for(int i=0;i<100;i++)X[i]=0;X[0]=X[1]=X[2]=1;
-    for(int i=0;i<100;i++)main2[i].push(X[i]);
-    // main2[0].print();
-    // cout<<main2[0].value_top(NULL)<<endl;
-    // cout<<main2<<endl;
-    // cout<<"<<<<<<<<<<<<<<<<<<<<<"<<endl;
-    if(xxx==0){
-        // cout<<123<<endl;
-        for(int i=0;i<1000;i++)
-            (*modules_func[0])(AAI_FLAGS_COMPUTE,NULL,main2,NULL,NULL,&which,modules_func,num_modules);
-    // cout<<"<<<<<<<<<<<<<<<<<<<<<"<<endl;
-    }
-    else if(xxx==1){
-        (*modules_func[0])(AAI_FLAGS_PUNISH,NULL,main2,NULL,NULL,NULL,NULL,0);
-        // cout<<456<<endl;
-    }
-    else if(xxx==2){
-        (*modules_func[0])(AAI_FLAGS_REWARD,NULL,main2,NULL,NULL,NULL,NULL,0);
-        // cout<<456<<endl;
-    }
-    else aai_queue::pp();
-    delete[] X;delete[] main2;
-    // finish();
+    // for(int i=0;i<num_modules;i++)puts(all_modules[i]);
+    // double *X=new double[100];int which;aai_queue *main2=new aai_queue[100];
+    // for(int i=0;i<100;i++)X[i]=0;X[0]=X[1]=X[2]=1;
+    // for(int i=0;i<100;i++)main2[i].push(X[i]);
+    // // main2[0].print();
+    // // cout<<main2[0].value_top(NULL)<<endl;
+    // // cout<<main2<<endl;
+    // // cout<<"<<<<<<<<<<<<<<<<<<<<<"<<endl;
+    // if(xxx==0){
+    //     // cout<<123<<endl;
+    //     for(int i=0;i<1000;i++)
+    //         (*modules_func[0])(AAI_FLAGS_COMPUTE,NULL,main2,NULL,NULL,&which,modules_func,num_modules);
+    // // cout<<"<<<<<<<<<<<<<<<<<<<<<"<<endl;
+    // }
+    // else if(xxx==1){
+    //     (*modules_func[0])(AAI_FLAGS_PUNISH,NULL,main2,NULL,NULL,NULL,NULL,0);
+    //     // cout<<456<<endl;
+    // }
+    // else if(xxx==2){
+    //     (*modules_func[0])(AAI_FLAGS_REWARD,NULL,main2,NULL,NULL,NULL,NULL,0);
+    //     // cout<<456<<endl;
+    // }
+    // else aai_queue::pp();
+    // delete[] X;delete[] main2;
     system("pause");
     return 0;
 }

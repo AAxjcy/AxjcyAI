@@ -17,7 +17,8 @@ AAI_DLL_EXPORT int auto_command(const int flags,aai_queue *main1,aai_queue *main
         double *Y,int *which,const void *modules_func,const int num_modules){
     srand(time(0));static int status_init=0;
     static aai_queue *first_data=new aai_queue[FIRST_NUMBER];
-    static aai_queue *output_data=new aai_queue[OUTPUT_NUMBER];
+    // static aai_queue *output_data=new aai_queue[OUTPUT_NUMBER];
+    static double output_data;
     static double **from_main,**first_to_output,**first_to_first;
     int status=AAI_STATUS_SUCCESS;
     switch(flags){
@@ -76,22 +77,9 @@ AAI_DLL_EXPORT int auto_command(const int flags,aai_queue *main1,aai_queue *main
             }
             f_in=fopen("module/auto_command/output_data.aad","r");
             n=OUTPUT_NUMBER;
-            if(!f_in)for(int i=0;i<n;i++){
-                tim=rand()%MAX_TIME+1;
-                for(int j=0;j<tim;j++)output_data[i].push(0);
-            }else{
-                for(int i=0;i<n;i++){
-                    fscanf(f_in,"%d",&tim);
-                    // cout<<tim<<' ';
-                    for(int j=0;j<tim;j++){
-                        fscanf(f_in,"%lf",&value);
-                        output_data[i].push(value);
-                        // cout<<value<<' ';
-                    }
-                    fscanf(f_in,"%lf",&value);
-                    output_data[i].set_sum(value);
-                    // cout<<endl<<"-----------------"<<endl;
-                }
+            if(!f_in)output_data=0;
+            else{
+                fscanf(f_in,"%lf",&output_data);
                 fclose(f_in);
             }
             break;
@@ -110,16 +98,10 @@ AAI_DLL_EXPORT int auto_command(const int flags,aai_queue *main1,aai_queue *main
             for(int i=0;i<n;i++)for(int j=0;j<m;j++)first_Y[i]+=first_to_first[i][j]*first_X[j];
             for(int i=0;i<n;i++)first_data[i].push(sigma(first_Y[i]));
             n=OUTPUT_NUMBER,m=FIRST_NUMBER;
-            // output_data[0].print();
-            double *output_X=new double [n],*output_Y=new double [n];
-            for(int i=0;i<n;i++)output_X[i]=output_data[i].pop(NULL)+(output_Y[i]=0);
-            for(int i=0;i<n;i++)for(int j=0;j<m;j++)output_Y[i]+=first_to_output[i][j]*first_X[j];
-            status=auto_adjust(output_X[0],(const func_point *)modules_func,num_modules);
-            for(int i=0;i<n;i++)output_data[i].push(sigma(output_Y[i]));
-            // output_data[0].print();
-            // cout<<"<<<<<<<<<<<<<<<<<<<<<"<<endl;
-            delete[] first_X;delete[] output_X;
-            delete[] first_Y;delete[] output_Y;
+            output_data=0;
+            for(int i=0;i<n;i++)for(int j=0;j<m;j++)output_data+=first_to_output[i][j]*first_X[j];
+            status=auto_adjust(output_data,(const func_point *)modules_func,num_modules);
+            delete[] first_X;delete[] first_Y;
             break;
         }
         case AAI_FLAGS_FINISH:{
@@ -156,22 +138,16 @@ AAI_DLL_EXPORT int auto_command(const int flags,aai_queue *main1,aai_queue *main
             }
             fclose(f_out);
             f_out=fopen("module/auto_command/output_data.aad","w");
-            n=OUTPUT_NUMBER;
-            for(int i=0;i<n;i++){
-                fprintf(f_out,"%d ",(tim=output_data[i].time_length()));
-                for(int j=0;j<tim;j++)fprintf(f_out,"%lf ",output_data[i].pop_no_decay(NULL));
-                fprintf(f_out,"%lf\n",output_data[i].get_sum(NULL));
-                // output_data[i].print();cout<<"----------------"<<endl;
-                // cout<<tim<<' ';double x;
-                // for(int j=0;j<tim;j++){
-                //     fprintf(f_out,"%lf ",(x=output_data[i].pop(NULL)));cout<<x<<' ';
-                // }
-                // cout<<endl;
-                // fprintf(f_out,"\n");
-            }
+            fprintf(f_out,"%lf\n",output_data);
+            // n=OUTPUT_NUMBER;
+            // for(int i=0;i<n;i++){
+            //     fprintf(f_out,"%d ",(tim=output_data[i].time_length()));
+            //     for(int j=0;j<tim;j++)fprintf(f_out,"%lf ",output_data[i].pop_no_decay(NULL));
+            //     fprintf(f_out,"%lf\n",output_data[i].get_sum(NULL));
+            // }
             fclose(f_out);
             delete[] first_data;
-            delete[] output_data;
+            // delete[] output_data;
             for(int i=0;i<FIRST_NUMBER;i++)delete[] from_main[i];
             delete[] from_main;
             for(int i=0;i<FIRST_NUMBER;i++)delete[] first_to_first[i];
@@ -185,49 +161,42 @@ AAI_DLL_EXPORT int auto_command(const int flags,aai_queue *main1,aai_queue *main
             int n=FIRST_NUMBER,m=FIRST_NUMBER;double x;
             for(int i=0;i<n;i++){
                 x=power(main2[i].value_now(NULL),AAI_FLAGS_PUNISH);
-                for(int j=0;j<n;j++)from_main[i][j]*=x;
+                for(int j=0;j<m;j++)from_main[i][j]*=x;
             }
             for(int i=0;i<n;i++){
                 x=power(first_data[i].value_now(NULL),AAI_FLAGS_PUNISH);
-                for(int j=0;j<n;j++)first_to_first[i][j]*=x;
+                for(int j=0;j<m;j++)first_to_first[i][j]*=x;
             }
             n=OUTPUT_NUMBER,m=FIRST_NUMBER;
             for(int i=0;i<n;i++){
                 x=power(first_data[i].value_now(NULL),AAI_FLAGS_PUNISH);
-                for(int j=0;j<n;j++)first_to_output[i][j]*=x;
+                for(int j=0;j<m;j++)first_to_output[i][j]*=x;
             }
             n=FIRST_NUMBER;
             for(int i=0;i<n;i++)first_data[i].shorter();
-            n=OUTPUT_NUMBER;
-            // output_data[0].print();
-            // cout<<"----------------------"<<endl;
-            for(int i=0;i<n;i++)output_data[i].shorter();
-            // output_data[0].print();
-            // cout<<"<<<<<<<<<<<<<<<<<<<<<"<<endl;
+            // n=OUTPUT_NUMBER;
+            // for(int i=0;i<n;i++)output_data[i].shorter();
             break;
         }
         case AAI_FLAGS_REWARD:{
             int n=FIRST_NUMBER,m=FIRST_NUMBER;double x;
             for(int i=0;i<n;i++){
                 x=power(main2[i].value_now(NULL),AAI_FLAGS_REWARD);
-                for(int j=0;j<n;j++)from_main[i][j]*=x;
+                for(int j=0;j<m;j++)from_main[i][j]*=x;
             }
             for(int i=0;i<n;i++){
                 x=power(first_data[i].value_now(NULL),AAI_FLAGS_REWARD);
-                for(int j=0;j<n;j++)first_to_first[i][j]*=x;
+                for(int j=0;j<m;j++)first_to_first[i][j]*=x;
             }
             n=OUTPUT_NUMBER,m=FIRST_NUMBER;
             for(int i=0;i<n;i++){
                 x=power(first_data[i].value_now(NULL),AAI_FLAGS_REWARD);
-                for(int j=0;j<n;j++)first_to_output[i][j]*=x;
+                for(int j=0;j<m;j++)first_to_output[i][j]*=x;
             }
             n=FIRST_NUMBER;
             for(int i=0;i<n;i++)first_data[i].longer();
-            n=OUTPUT_NUMBER;
-            // output_data[0].print();
-            for(int i=0;i<n;i++)output_data[i].longer();
-            // output_data[0].print();
-            // cout<<"<<<<<<<<<<<<<<<<<<<<<"<<endl;
+            // n=OUTPUT_NUMBER;
+            // for(int i=0;i<n;i++)output_data[i].longer();
             break;
         }
     }
