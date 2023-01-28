@@ -1,3 +1,5 @@
+// #define UNICODE
+// #define _UNICODE
 #include"include/universal.hpp"
 #include<windows.h>
 using namespace std;
@@ -13,6 +15,7 @@ int init(){
     int len;int n=0;
     fseek(f_in,0,SEEK_END);len=ftell(f_in);fseek(f_in,0,SEEK_SET);
     char *reg=new char[len+20];
+    // wchar_t *wide_reg=new wchar_t[len+20];
     while(fscanf(f_in,"%s",reg)!=EOF){
         if(reg[0]!='/')(num_modules)++;n++;
     }all_modules=new char*[num_modules];
@@ -26,27 +29,43 @@ int init(){
     }
     fclose(f_in);HMODULE dll_point=NULL;
     modules_func=new func_point[num_modules];
+    // cout<<num_modules<<endl;
     for(int i=0;i<num_modules;i++){
-        strcpy(reg,"lib/");
-        strcat(reg,all_modules[i]);
-        strcat(reg,".dll");
-        dll_point=LoadLibrary(reg);
-        // dll_point=LoadLibrary("auto_command");
+        sprintf(reg,"lib/%s.dll",all_modules[i]);
+        // strcpy(reg,"lib/");
+        // strcat(reg,all_modules[i]);
+        // strcat(reg,".dll");
+        // puts(reg);
+        // MultiByteToWideChar(CP_ACP,0,reg,-1,wide_reg,MultiByteToWideChar(CP_ACP,0,reg,-1,wide_reg,0));
+        // puts(reg);
+        // wprintf(wide_reg);puts("");
+        // dll_point=LoadLibrary(reg);
+        // dll_point=LoadLibrary(wide_reg);
+        dll_point=LoadLibraryA(reg);
+        // puts(reg);
         if(!dll_point){
             delete[] reg;
             return AAI_STATUS_NO_DLL;
         }
+        // puts(reg);
         // puts(all_modules[i]);
         // modules_func[i]=(func_point)GetProcAddress(dll_point,"f");
         // modules_func[i]=(func_point)GetProcAddress(dll_point,"auto_command");
         modules_func[i]=(func_point)GetProcAddress(dll_point,all_modules[i]);
+        // puts(reg);
         if(!modules_func[i]){
             delete[] reg;
             return AAI_STATUS_NO_FUNCTION;
         }
+        // puts(reg);
         (*modules_func[i])(AAI_FLAGS_INIT,NULL,NULL,NULL,NULL,NULL,NULL,0);
+        // puts(reg);
     }
+    // puts("------------------");
     delete[] reg;
+    // puts("------------------");
+    // delete[] wide_reg;
+    // puts("------------------");
     return AAI_STATUS_SUCCESS;
 }
 void finish(){
@@ -84,10 +103,11 @@ void err_print(int status){
     }
 }
 int main(){
-    int xxx;
-    cin>>xxx;
+    // int xxx;
+    // cin>>xxx;
     int status;{
         status=init();
+        // puts("------------------");
         atexit(finish);
     }
     if(status){
@@ -95,7 +115,7 @@ int main(){
         system("pause");
         return 0;
     }
-    // for(int i=0;i<num_modules;i++)puts(all_modules[i]);
+    for(int i=0;i<num_modules;i++)puts(all_modules[i]);
     // double *X=new double[100];int which;aai_queue *main2=new aai_queue[100];
     // for(int i=0;i<100;i++)X[i]=0;X[0]=X[1]=X[2]=1;
     // for(int i=0;i<100;i++)main2[i].push(X[i]);

@@ -159,18 +159,15 @@ AAI_DLL_EXPORT int auto_command(const int flags,aai_queue *main1,aai_queue *main
         case AAI_FLAGS_PUNISH:{
             // cout<<"----------------"<<endl;
             int n=FIRST_NUMBER,m=FIRST_NUMBER;double x;
-            for(int i=0;i<n;i++){
-                x=power(main2[i].value_now(NULL),AAI_FLAGS_PUNISH);
-                for(int j=0;j<m;j++)from_main[i][j]*=x;
+            for(int j=0;j<m;j++){
+                x=power(main2[j].value_now(NULL),AAI_FLAGS_PUNISH);
+                for(int i=0;i<n;i++)from_main[i][j]*=x;
             }
-            for(int i=0;i<n;i++){
-                x=power(first_data[i].value_now(NULL),AAI_FLAGS_PUNISH);
-                for(int j=0;j<m;j++)first_to_first[i][j]*=x;
-            }
-            n=OUTPUT_NUMBER,m=FIRST_NUMBER;
-            for(int i=0;i<n;i++){
-                x=power(first_data[i].value_now(NULL),AAI_FLAGS_PUNISH);
-                for(int j=0;j<m;j++)first_to_output[i][j]*=x;
+            for(int j=0;j<m;j++){
+                x=power(first_data[j].value_now(NULL),AAI_FLAGS_PUNISH);
+                for(int i=0;i<n;i++)first_to_first[i][j]*=x;
+                n=OUTPUT_NUMBER;
+                for(int i=0;i<n;i++)first_to_output[i][j]*=x;
             }
             n=FIRST_NUMBER;
             for(int i=0;i<n;i++)first_data[i].shorter();
@@ -180,18 +177,15 @@ AAI_DLL_EXPORT int auto_command(const int flags,aai_queue *main1,aai_queue *main
         }
         case AAI_FLAGS_REWARD:{
             int n=FIRST_NUMBER,m=FIRST_NUMBER;double x;
-            for(int i=0;i<n;i++){
-                x=power(main2[i].value_now(NULL),AAI_FLAGS_REWARD);
-                for(int j=0;j<m;j++)from_main[i][j]*=x;
+            for(int j=0;j<m;j++){
+                x=power(main2[j].value_now(NULL),AAI_FLAGS_REWARD);
+                for(int i=0;i<n;i++)from_main[i][j]*=x;
             }
-            for(int i=0;i<n;i++){
-                x=power(first_data[i].value_now(NULL),AAI_FLAGS_REWARD);
-                for(int j=0;j<m;j++)first_to_first[i][j]*=x;
-            }
-            n=OUTPUT_NUMBER,m=FIRST_NUMBER;
-            for(int i=0;i<n;i++){
-                x=power(first_data[i].value_now(NULL),AAI_FLAGS_REWARD);
-                for(int j=0;j<m;j++)first_to_output[i][j]*=x;
+            for(int j=0;j<m;j++){
+                x=power(first_data[j].value_now(NULL),AAI_FLAGS_REWARD);
+                for(int i=0;i<n;i++)first_to_first[i][j]*=x;
+                n=OUTPUT_NUMBER;
+                for(int i=0;i<n;i++)first_to_output[i][j]*=x;
             }
             n=FIRST_NUMBER;
             for(int i=0;i<n;i++)first_data[i].longer();

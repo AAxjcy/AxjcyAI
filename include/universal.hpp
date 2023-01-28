@@ -10,9 +10,9 @@
     #define AAI_DLL_EXPORT __declspec(dllimport)
 #endif
 
-#define MAIN_FIRST_NUMBER 3000
-#define MAIN_SECOND_NUMBER 4000
-#define MAIN_THIRD_NUMBER 3000
+#define MAIN_FIRST_NUMBER 2000
+#define MAIN_SECOND_NUMBER 3000
+#define MAIN_THIRD_NUMBER 2000
 
 #define AAI_FLAGS_INIT 0
 #define AAI_FLAGS_COMPUTE 1

@@ -4,7 +4,7 @@ auto_command
 //in_picture
 //in_sound
 in_string
-//memory
+memory
 //out_command
 //out_sound
-//out_string
+out_string
