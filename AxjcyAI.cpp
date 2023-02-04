@@ -1,10 +1,9 @@
-#define UNICODE
-#define _UNICODE
 #include"include/universal.hpp"
-#include<windows.h>
 
 #define MAIN_LIST 0
 #define MAIN_BUTTON 1
+
+const char *str_module="main";
 
 using namespace std;
 char **all_modules;int num_modules=0;
@@ -14,8 +13,8 @@ double **first_to_first,**first_to_second,**second_to_second,**second_to_third,*
 int *list_to_function,num_list=0;
 int init(){
     aai_queue::init();
-    FILE *f_in=fopen("module/module.aad","r");
-    if(!f_in)return AAI_STATUS_NO_MODULE;
+    if(!PathFileExistsA("./module/"))CreateDirectoryA("./module/",NULL);
+    FILE *f_in=fopen("module/module.aad","a+");
     int len;int n=0;
     fseek(f_in,0,SEEK_END);len=ftell(f_in);fseek(f_in,0,SEEK_SET);
     char *reg=new char[len+20];
@@ -71,111 +70,14 @@ int init(){
     for(int i=0;i<had;i++)putchar('=');
     for(int i=had;i<50;i++)putchar(' ');
     printf("|%d/%d main\n",num_modules,num_modules+1);
-    first_data=new aai_queue[MAIN_FIRST_NUMBER];
-    second_data=new aai_queue[MAIN_SECOND_NUMBER];
-    third_data=new aai_queue[MAIN_THIRD_NUMBER];
-    f_in=fopen("module/main/first_to_first.aad","r");
-    n=MAIN_FIRST_NUMBER;int m=MAIN_FIRST_NUMBER;
-    first_to_first=new double *[n];
-    for(int i=0;i<n;i++)first_to_first[i]=new double[m];
-    if(!f_in)for(int i=0;i<n;i++)for(int j=0;j<m;j++)
-        first_to_first[i][j]=rand()%(2*MAX_INIT_WEIGHT+1)-MAX_INIT_WEIGHT;
-    else{
-        for(int i=0;i<n;i++)for(int j=0;j<m;j++)fscanf(f_in,"%lf",&first_to_first[i][j]);
-        fclose(f_in);
-    }
-    f_in=fopen("module/main/first_to_second.aad","r");
-    n=MAIN_SECOND_NUMBER,m=MAIN_FIRST_NUMBER;
-    first_to_second=new double *[n];
-    for(int i=0;i<n;i++)first_to_second[i]=new double[m];
-    if(!f_in)for(int i=0;i<n;i++)for(int j=0;j<m;j++)
-        first_to_second[i][j]=rand()%(2*MAX_INIT_WEIGHT+1)-MAX_INIT_WEIGHT;
-    else{
-        for(int i=0;i<n;i++)for(int j=0;j<m;j++)fscanf(f_in,"%lf",&first_to_second[i][j]);
-        fclose(f_in);
-    }
-    f_in=fopen("module/main/second_to_second.aad","r");
-    n=MAIN_SECOND_NUMBER,m=MAIN_SECOND_NUMBER;
-    second_to_second=new double *[n];
-    for(int i=0;i<n;i++)second_to_second[i]=new double[m];
-    if(!f_in)for(int i=0;i<n;i++)for(int j=0;j<m;j++)
-        second_to_second[i][j]=rand()%(2*MAX_INIT_WEIGHT+1)-MAX_INIT_WEIGHT;
-    else{
-        for(int i=0;i<n;i++)for(int j=0;j<m;j++)fscanf(f_in,"%lf",&second_to_second[i][j]);
-        fclose(f_in);
-    }
-    f_in=fopen("module/main/second_to_third.aad","r");
-    n=MAIN_THIRD_NUMBER,m=MAIN_SECOND_NUMBER;
-    second_to_third=new double *[n];
-    for(int i=0;i<n;i++)second_to_third[i]=new double[m];
-    if(!f_in)for(int i=0;i<n;i++)for(int j=0;j<m;j++)
-        second_to_third[i][j]=rand()%(2*MAX_INIT_WEIGHT+1)-MAX_INIT_WEIGHT;
-    else{
-        for(int i=0;i<n;i++)for(int j=0;j<m;j++)fscanf(f_in,"%lf",&second_to_third[i][j]);
-        fclose(f_in);
-    }
-    f_in=fopen("module/main/third_to_third.aad","r");
-    n=MAIN_THIRD_NUMBER,m=MAIN_THIRD_NUMBER;
-    third_to_third=new double *[n];
-    for(int i=0;i<n;i++)third_to_third[i]=new double[m];
-    if(!f_in)for(int i=0;i<n;i++)for(int j=0;j<m;j++)
-        third_to_third[i][j]=rand()%(2*MAX_INIT_WEIGHT+1)-MAX_INIT_WEIGHT;
-    else{
-        for(int i=0;i<n;i++)for(int j=0;j<m;j++)fscanf(f_in,"%lf",&third_to_third[i][j]);
-        fclose(f_in);
-    }
-    f_in=fopen("module/main/first_data.aad","r");
-    n=MAIN_FIRST_NUMBER;
-    int tim;double value;
-    if(!f_in)for(int i=0;i<n;i++){
-        tim=rand()%MAX_TIME+1;
-        for(int j=0;j<tim;j++)first_data[i].push(0);
-    }else{
-        for(int i=0;i<n;i++){
-            fscanf(f_in,"%d",&tim);
-            for(int j=0;j<tim;j++){
-                fscanf(f_in,"%lf",&value);
-                first_data[i].push(value);
-            }
-            fscanf(f_in,"%lf",&value);
-            first_data[i].set_sum(value);
-        }
-        fclose(f_in);
-    }
-    f_in=fopen("module/main/second_data.aad","r");
-    n=MAIN_SECOND_NUMBER;
-    if(!f_in)for(int i=0;i<n;i++){
-        tim=rand()%MAX_TIME+1;
-        for(int j=0;j<tim;j++)second_data[i].push(0);
-    }else{
-        for(int i=0;i<n;i++){
-            fscanf(f_in,"%d",&tim);
-            for(int j=0;j<tim;j++){
-                fscanf(f_in,"%lf",&value);
-                second_data[i].push(value);
-            }
-            fscanf(f_in,"%lf",&value);
-            second_data[i].set_sum(value);
-        }
-        fclose(f_in);
-    }
-    f_in=fopen("module/main/third_data.aad","r");
-    n=MAIN_THIRD_NUMBER;
-    if(!f_in)for(int i=0;i<n;i++){
-        tim=rand()%MAX_TIME+1;
-        for(int j=0;j<tim;j++)third_data[i].push(0);
-    }else{
-        for(int i=0;i<n;i++){
-            fscanf(f_in,"%d",&tim);
-            for(int j=0;j<tim;j++){
-                fscanf(f_in,"%lf",&value);
-                third_data[i].push(value);
-            }
-            fscanf(f_in,"%lf",&value);
-            third_data[i].set_sum(value);
-        }
-        fclose(f_in);
-    }
+    read_weight(str_module,"first_to_first",MAIN_FIRST_NUMBER,MAIN_FIRST_NUMBER,first_to_first);
+    read_weight(str_module,"first_to_second",MAIN_SECOND_NUMBER,MAIN_FIRST_NUMBER,first_to_second);
+    read_weight(str_module,"second_to_second",MAIN_SECOND_NUMBER,MAIN_SECOND_NUMBER,second_to_second);
+    read_weight(str_module,"second_to_third",MAIN_THIRD_NUMBER,MAIN_SECOND_NUMBER,second_to_third);
+    read_weight(str_module,"third_to_third",MAIN_THIRD_NUMBER,MAIN_THIRD_NUMBER,third_to_third);
+    read_data(str_module,"first_data",MAIN_FIRST_NUMBER,first_data);
+    read_data(str_module,"second_data",MAIN_SECOND_NUMBER,second_data);
+    read_data(str_module,"third_data",MAIN_THIRD_NUMBER,third_data);
     system("cls");
     puts("请稍后，正在初始化模块");
     for(int i=0;i<50;i++)putchar('=');
@@ -189,74 +91,14 @@ void finish(){
         (*modules_func[i])(AAI_FLAGS_FINISH,NULL,NULL,NULL,NULL,NULL,NULL,0);
     for(int i=0;i<num_modules;i++)delete[] all_modules[i];
     delete[] all_modules;delete[] modules_func;delete[] list_to_function;
-    FILE* f_out=fopen("module/main/first_to_first.aad","w");
-    int n=MAIN_FIRST_NUMBER,m=MAIN_FIRST_NUMBER;
-    for(int i=0;i<n;i++){
-        for(int j=0;j<m;j++)fprintf(f_out,"%lf ",first_to_first[i][j]);
-        fprintf(f_out,"\n");
-    }
-    fclose(f_out);
-    f_out=fopen("module/main/first_to_second.aad","w");
-    n=MAIN_SECOND_NUMBER,m=MAIN_FIRST_NUMBER;
-    for(int i=0;i<n;i++){
-        for(int j=0;j<m;j++)fprintf(f_out,"%lf ",first_to_second[i][j]);
-        fprintf(f_out,"\n");
-    }
-    fclose(f_out);
-    f_out=fopen("module/main/second_to_second.aad","w");
-    n=MAIN_SECOND_NUMBER,m=MAIN_SECOND_NUMBER;
-    for(int i=0;i<n;i++){
-        for(int j=0;j<m;j++)fprintf(f_out,"%lf ",second_to_second[i][j]);
-        fprintf(f_out,"\n");
-    }
-    fclose(f_out);
-    f_out=fopen("module/main/second_to_third.aad","w");
-    n=MAIN_THIRD_NUMBER,m=MAIN_SECOND_NUMBER;
-    for(int i=0;i<n;i++){
-        for(int j=0;j<m;j++)fprintf(f_out,"%lf ",second_to_third[i][j]);
-        fprintf(f_out,"\n");
-    }
-    fclose(f_out);
-    f_out=fopen("module/main/third_to_third.aad","w");
-    n=MAIN_THIRD_NUMBER,m=MAIN_THIRD_NUMBER;
-    for(int i=0;i<n;i++){
-        for(int j=0;j<m;j++)fprintf(f_out,"%lf ",third_to_third[i][j]);
-        fprintf(f_out,"\n");
-    }
-    fclose(f_out);
-    f_out=fopen("module/main/first_data.aad","w");
-    n=MAIN_FIRST_NUMBER;
-    int tim;
-    for(int i=0;i<n;i++){
-        fprintf(f_out,"%d ",(tim=first_data[i].time_length()));
-        for(int j=0;j<tim;j++)fprintf(f_out,"%lf ",first_data[i].pop_no_decay(NULL));
-        fprintf(f_out,"%lf\n",first_data[i].get_sum(NULL));
-    }
-    fclose(f_out);
-    f_out=fopen("module/main/second_data.aad","w");
-    n=MAIN_SECOND_NUMBER;
-    for(int i=0;i<n;i++){
-        fprintf(f_out,"%d ",(tim=second_data[i].time_length()));
-        for(int j=0;j<tim;j++)fprintf(f_out,"%lf ",second_data[i].pop_no_decay(NULL));
-        fprintf(f_out,"%lf\n",second_data[i].get_sum(NULL));
-    }
-    fclose(f_out);
-    f_out=fopen("module/main/third_data.aad","w");
-    n=MAIN_THIRD_NUMBER;
-    for(int i=0;i<n;i++){
-        fprintf(f_out,"%d ",(tim=third_data[i].time_length()));
-        for(int j=0;j<tim;j++)fprintf(f_out,"%lf ",third_data[i].pop_no_decay(NULL));
-        fprintf(f_out,"%lf\n",third_data[i].get_sum(NULL));
-    }
-    fclose(f_out);
-    delete[] first_data;
-    delete[] second_data;
-    delete[] third_data;
-    for(int i=0;i<MAIN_FIRST_NUMBER;i++)delete[] first_to_first[i];delete[] first_to_first;
-    for(int i=0;i<MAIN_SECOND_NUMBER;i++)delete[] first_to_second[i];delete[] first_to_second;
-    for(int i=0;i<MAIN_SECOND_NUMBER;i++)delete[] second_to_second[i];delete[] second_to_second;
-    for(int i=0;i<MAIN_THIRD_NUMBER;i++)delete[] second_to_third[i];delete[] second_to_third;
-    for(int i=0;i<MAIN_THIRD_NUMBER;i++)delete[] third_to_third[i];delete[] third_to_third;
+    write_weight(str_module,"first_to_first",MAIN_FIRST_NUMBER,MAIN_FIRST_NUMBER,first_to_first);
+    write_weight(str_module,"first_to_second",MAIN_SECOND_NUMBER,MAIN_FIRST_NUMBER,first_to_second);
+    write_weight(str_module,"second_to_second",MAIN_SECOND_NUMBER,MAIN_SECOND_NUMBER,second_to_second);
+    write_weight(str_module,"second_to_third",MAIN_THIRD_NUMBER,MAIN_SECOND_NUMBER,second_to_third);
+    write_weight(str_module,"third_to_third",MAIN_THIRD_NUMBER,MAIN_THIRD_NUMBER,third_to_third);
+    write_data(str_module,"first_data",MAIN_FIRST_NUMBER,first_data);
+    write_data(str_module,"second_data",MAIN_SECOND_NUMBER,second_data);
+    write_data(str_module,"third_data",MAIN_THIRD_NUMBER,third_data);
     aai_queue::finish();
 }
 void err_print(int status){
@@ -270,9 +112,6 @@ void err_print(int status){
             break;
         case AAI_STATUS_NULL_QUEUE:
             puts("error:对空神经元进行操作");
-            break;
-        case AAI_STATUS_NO_MODULE:
-            puts("error:找不到module/module.aad");
             break;
         case AAI_STATUS_NO_DLL:
             puts("error:找不到dll");

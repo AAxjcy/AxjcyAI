@@ -1,4 +1,12 @@
+#define UNICODE
+#define _UNICODE
+
 #include<bits/stdc++.h>
+#include<windows.h>
+#include<shlwapi.h>
+// extern "C"{
+// #include<shlwapi.h>
+// }
 
 #ifndef _UNIVERSAL_HPP_
 #define _UNIVERSAL_HPP_
@@ -24,10 +32,9 @@
 #define AAI_STATUS_REPEAT_INIT 1
 #define AAI_STATUS_FULL_QUEUE 2
 #define AAI_STATUS_NULL_QUEUE 3
-#define AAI_STATUS_NO_MODULE 4
-#define AAI_STATUS_NO_DLL 5
-#define AAI_STATUS_NO_FUNCTION 6
-#define AAI_STATUS_ADJUST_FAILED 7
+#define AAI_STATUS_NO_DLL 4
+#define AAI_STATUS_NO_FUNCTION 5
+#define AAI_STATUS_ADJUST_FAILED 6
 
 #define AAI_COMPUTE_NONE 0
 #define AAI_COMPUTE_FIRST 1
@@ -154,5 +161,72 @@ typedef int (*func_point)(const int flags,aai_queue *X1,aai_queue *X2,aai_queue 
 
 double sigma(double x){return 1/(1+exp(-x));}
 double power(double x,int flags){return exp(x*((flags==AAI_FLAGS_PUNISH)?pow_p:pow_r));}
+
+void read_weight(const char *str_module,const char *str_name,const int n,const int m,double** &A){
+    char *reg=new char[strlen(str_module)+strlen(str_name)+20];
+    sprintf(reg,"module/%s/%s.aad",str_module,str_name);
+    FILE *f_in=fopen(reg,"r");
+    A=new double *[n];
+    for(int i=0;i<n;i++)A[i]=new double[m];
+    if(!f_in)for(int i=0;i<n;i++)for(int j=0;j<m;j++)
+        A[i][j]=rand()%(2*MAX_INIT_WEIGHT+1)-MAX_INIT_WEIGHT;
+    else{
+        for(int i=0;i<n;i++)for(int j=0;j<m;j++)fscanf(f_in,"%lf",&A[i][j]);
+        fclose(f_in);
+    }
+    delete[] reg;
+}
+void read_data(const char *str_module,const char *str_name,const int n,aai_queue* &X){
+    char *reg=new char[strlen(str_module)+strlen(str_name)+20];
+    sprintf(reg,"module/%s/%s.aad",str_module,str_name);
+    FILE *f_in=fopen(reg,"r");
+    X=new aai_queue[n];
+    int tim;double value;
+    if(!f_in)for(int i=0;i<n;i++){
+        tim=rand()%MAX_TIME+1;
+        for(int j=0;j<tim;j++)X[i].push(0);
+    }else{
+        for(int i=0;i<n;i++){
+            fscanf(f_in,"%d",&tim);
+            for(int j=0;j<tim;j++){
+                fscanf(f_in,"%lf",&value);
+                X[i].push(value);
+            }
+            fscanf(f_in,"%lf",&value);
+            X[i].set_sum(value);
+        }
+        fclose(f_in);
+    }
+    delete[] reg;
+}
+void write_weight(const char *str_module,const char *str_name,const int n,const int m,double** A){
+    char *reg=new char[strlen(str_module)+strlen(str_name)+20];
+    sprintf(reg,"module/%s/",str_module);
+    if(!PathFileExistsA(reg))CreateDirectoryA(reg,NULL);
+    sprintf(reg,"module/%s/%s.aad",str_module,str_name);
+    FILE *f_out=fopen(reg,"w");
+    for(int i=0;i<n;i++){
+        for(int j=0;j<m;j++)fprintf(f_out,"%lf ",A[i][j]);
+        fprintf(f_out,"\n");
+    }
+    fclose(f_out);
+    for(int i=0;i<n;i++)delete[] A[i];delete[] A;
+    delete[] reg;
+}
+void write_data(const char *str_module,const char *str_name,const int n,aai_queue* X){
+    char *reg=new char[strlen(str_module)+strlen(str_name)+20];
+    sprintf(reg,"module/%s/",str_module);
+    if(!PathFileExistsA(reg))CreateDirectoryA(reg,NULL);
+    sprintf(reg,"module/%s/%s.aad",str_module,str_name);
+    FILE* f_out=fopen(reg,"w");
+    int tim;
+    for(int i=0;i<n;i++){
+        fprintf(f_out,"%d ",(tim=X[i].time_length()));
+        for(int j=0;j<tim;j++)fprintf(f_out,"%lf ",X[i].pop_no_decay(NULL));
+        fprintf(f_out,"%lf\n",X[i].get_sum(NULL));
+    }
+    fclose(f_out);
+    delete[] reg;delete[] X;
+}
 
 #endif
