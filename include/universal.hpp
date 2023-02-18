@@ -1,5 +1,9 @@
+#ifndef UNICODE
 #define UNICODE
+#endif
+#ifndef _UNICODE
 #define _UNICODE
+#endif
 
 #include<bits/stdc++.h>
 #include<windows.h>
@@ -35,6 +39,9 @@
 #define AAI_STATUS_NO_DLL 4
 #define AAI_STATUS_NO_FUNCTION 5
 #define AAI_STATUS_ADJUST_FAILED 6
+#define AAI_STATUS_CREATE_WINDOW_ERROR 7
+#define AAI_STATUS_NO_EXE 8
+#define AAI_STATUS_NO_ENOUGH_MEMORY 9
 
 #define AAI_COMPUTE_NONE 0
 #define AAI_COMPUTE_FIRST 1

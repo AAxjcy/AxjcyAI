@@ -11,6 +11,8 @@ func_point *modules_func;
 aai_queue *first_data,*second_data,*third_data;
 double **first_to_first,**first_to_second,**second_to_second,**second_to_third,**third_to_third;
 int *list_to_function,num_list=0;
+int status=0;
+char window_close=0,*opened_window;
 int init(){
     aai_queue::init();
     if(!PathFileExistsA("./module/"))CreateDirectoryA("./module/",NULL);
@@ -36,6 +38,7 @@ int init(){
     fclose(f_in);HMODULE dll_point=NULL;
     modules_func=new func_point[num_modules];
     list_to_function=new int[num_list];int inl=0;
+    opened_window=new char[num_list];memset(opened_window,0,sizeof(char)*num_list);
     for(int i=0;i<num_modules;i++){
         if(strlen(all_modules[i])>3)
             if(all_modules[i][0]=='i'&&all_modules[i][1]=='n'&&all_modules[i][2]=='_')list_to_function[inl++]=i;
@@ -122,11 +125,46 @@ void err_print(int status){
         case AAI_STATUS_ADJUST_FAILED:
             puts("error:自动调节失败");
             break;
+        case AAI_STATUS_CREATE_WINDOW_ERROR:
+            puts("error:创建窗口失败");
+            break;
+        case AAI_STATUS_NO_EXE:
+            puts("error:找不到exe");
+            break;
+        case AAI_STATUS_NO_ENOUGH_MEMORY:
+            puts("error:内存不足");
+            break;
     }
+}
+void open_window(HWND hwnd,int list_number){
+    opened_window[list_number]=1;
+    char *reg=new char[15+strlen(all_modules[list_to_function[list_number]])];
+    sprintf(reg,"%s.exe",all_modules[list_to_function[list_number]]);
+    SHELLEXECUTEINFOA ShExecInfo={0};
+    ShExecInfo.cbSize=sizeof(SHELLEXECUTEINFOA);
+    ShExecInfo.fMask=SEE_MASK_NOCLOSEPROCESS;
+    ShExecInfo.hwnd=NULL;
+    ShExecInfo.lpVerb="open";
+    ShExecInfo.lpFile=reg;
+    ShExecInfo.lpParameters="";
+    ShExecInfo.lpDirectory="bin";
+    ShExecInfo.nShow=SW_SHOWNORMAL;
+    ShExecInfo.hInstApp=NULL;
+    ShellExecuteExA(&ShExecInfo);
+    if((long long)ShExecInfo.hInstApp<=32)switch((long long)ShExecInfo.hInstApp){
+        case SE_ERR_FNF:puts("找不到文件。");status=AAI_STATUS_NO_EXE;return;
+        case SE_ERR_OOM:puts("内存不足。");status=AAI_STATUS_NO_ENOUGH_MEMORY;return;
+    }
+    WaitForSingleObject(ShExecInfo.hProcess,INFINITE);
+    DWORD exit_code=0;
+    GetExitCodeProcess(ShExecInfo.hProcess,&exit_code);
+    status=exit_code;
+    opened_window[list_number]=0;
 }
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
     switch (uMsg){
         case WM_DESTROY:{
+            window_close=1;
             PostQuitMessage(0);
             return 0;
         }
@@ -154,9 +192,11 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
                 int *list_choice=new int[num_list];
                 HWND hListBox=GetDlgItem(hwnd,MAIN_LIST);
                 int len=SendMessageA(hListBox,LB_GETSELITEMS,num_list,(LPARAM)list_choice);
-                for(int i=0;i<len;i++){
-                    TextOutA(hdc,0,200+i*10,all_modules[list_to_function[list_choice[i]]],
-                        strlen(all_modules[list_to_function[list_choice[i]]]));
+                for(int i=0;i<len;i++)if(!opened_window[list_choice[i]]){
+                    thread thread_window(open_window,hwnd,list_choice[i]);
+                    thread_window.detach();
+                    // TextOutA(hdc,0,200+i*10,all_modules[list_to_function[list_choice[i]]],
+                    //     strlen(all_modules[list_to_function[list_choice[i]]]));
                 }
                 delete[] list_choice;
                 EndPaint(hwnd,&ps);
@@ -168,22 +208,23 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 void main_window(){
-    ShowWindow(GetConsoleWindow(),SW_HIDE);
+    // ShowWindow(GetConsoleWindow(),SW_HIDE);
     HINSTANCE hInstance=GetModuleHandle(NULL);
     int nCmdShow=SW_SHOWNORMAL;
     LPTSTR szCmdLine=GetCommandLine();
-    const wchar_t CLASS_NAME[]=L"Axjcy Window Class";
+    const wchar_t CLASS_NAME[]=L"AxjcyAI Window Class";
+    // puts("------------------");
     WNDCLASS wc={};
     wc.lpfnWndProc=WindowProc;
     wc.hInstance=hInstance;
     wc.lpszClassName=CLASS_NAME;
     RegisterClass(&wc);
     // Create the window.
-    HWND hwnd=CreateWindowEx(0,CLASS_NAME,L"Learn to Program Windows",
+    HWND hwnd=CreateWindowEx(0,CLASS_NAME,L"AxjcyAI",
         WS_OVERLAPPEDWINDOW|WS_VSCROLL|WS_HSCROLL,
         CW_USEDEFAULT,CW_USEDEFAULT,CW_USEDEFAULT,CW_USEDEFAULT,
         NULL,NULL,hInstance,NULL);
-    if(hwnd==NULL)return;
+    if(hwnd==NULL){status=AAI_STATUS_CREATE_WINDOW_ERROR;return;}
     HWND hListBox=CreateWindowEx(0,L"ListBox",NULL,WS_VISIBLE|WS_CHILD|WS_BORDER|WS_VSCROLL|LBS_HASSTRINGS|LBS_EXTENDEDSEL,
         0,0,100,200,hwnd,(HMENU)MAIN_LIST,hInstance,0);
     for (int i=0;i<num_list;i++)
@@ -197,45 +238,40 @@ void main_window(){
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
-    ShowWindow(GetConsoleWindow(),SW_SHOWNORMAL);
+    // ShowWindow(GetConsoleWindow(),SW_SHOWNORMAL);
 }
 int main(){
     // int xxx;
     // cin>>xxx;
-    int status;
     status=init();
-    // puts("------------------");
     if(status){
         err_print(status);
         system("pause");
         return 0;
     }
-    atexit(finish);
-    main_window();
+    // atexit(finish);
+    thread thread_window(main_window);
+    thread_window.detach();
+    while(!window_close){
+        if(status){
+            err_print(status);
+            system("pause");
+            return 0;
+        }
+        // system("cls");
+        // printf("%d",window_close);
+    }
+    if(status){
+        err_print(status);
+        system("pause");
+        return 0;
+    }
     for(int i=0;i<num_modules;i++)puts(all_modules[i]);
-    // double *X=new double[100];int which;aai_queue *main2=new aai_queue[100];
-    // for(int i=0;i<100;i++)X[i]=0;X[0]=X[1]=X[2]=1;
-    // for(int i=0;i<100;i++)main2[i].push(X[i]);
-    // // main2[0].print();
-    // // cout<<main2[0].value_top(NULL)<<endl;
-    // // cout<<main2<<endl;
-    // // cout<<"<<<<<<<<<<<<<<<<<<<<<"<<endl;
-    // if(xxx==0){
-    //     // cout<<123<<endl;
-    //     for(int i=0;i<1000;i++)
-    //         (*modules_func[0])(AAI_FLAGS_COMPUTE,NULL,main2,NULL,NULL,&which,modules_func,num_modules);
-    // // cout<<"<<<<<<<<<<<<<<<<<<<<<"<<endl;
+    finish();
+    // if(thread_finish){
+    //     thread_finish->join();
+    //     delete thread_finish;
     // }
-    // else if(xxx==1){
-    //     (*modules_func[0])(AAI_FLAGS_PUNISH,NULL,main2,NULL,NULL,NULL,NULL,0);
-    //     // cout<<456<<endl;
-    // }
-    // else if(xxx==2){
-    //     (*modules_func[0])(AAI_FLAGS_REWARD,NULL,main2,NULL,NULL,NULL,NULL,0);
-    //     // cout<<456<<endl;
-    // }
-    // else aai_queue::pp();
-    // delete[] X;delete[] main2;
     system("pause");
     return 0;
 }
