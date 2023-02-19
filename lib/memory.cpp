@@ -82,7 +82,7 @@ AAI_DLL_EXPORT int memory(const int flags,aai_queue *main1,aai_queue *main2,aai_
             for(int i=0;i<n;i++)for(int j=0;j<m;j++)first_Y[i]+=second_to_first[i][j]*second_X[j];
             n=FIRST_NUMBER;
             for(int i=0;i<n;i++){
-                m=(sigma(first_Y[i])*2-1)*SHORT_LENGTH;
+                m=tanh(first_Y[i])*SHORT_LENGTH;
                 if(!m){first_data[i].push(0);continue;}
                 if(m<0)short_memory[i].flip((m*=-1)-1);
                 first_data[i].push(short_memory[i][m-1]);
@@ -92,7 +92,7 @@ AAI_DLL_EXPORT int memory(const int flags,aai_queue *main1,aai_queue *main2,aai_
             char *st=new char[50],buf;
             for(int i=0;i<n;i++){
                 sprintf(st,"module/memory/long/%d.aad",i);
-                m=(sigma(second_Y[i])*2-1)*LONG_LENGTH;
+                m=tanh(second_Y[i])*LONG_LENGTH;
                 if(!m){second_data[i].push(0);continue;}
                 f_long.open(st,ios::binary|ios::out|ios::in);
                 if(m<0){

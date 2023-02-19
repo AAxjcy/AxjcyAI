@@ -51,7 +51,7 @@ AAI_DLL_EXPORT int auto_command(const int flags,aai_queue *main1,aai_queue *main
             // for(int i=0;i<m;i++)cout<<main2[i].value_top(NULL)<<' ';cout<<endl;
             for(int i=0;i<n;i++)for(int j=0;j<m;j++)first_Y[i]+=from_main[i][j]*main2[j].value_top(NULL);
             for(int i=0;i<n;i++)for(int j=0;j<m;j++)first_Y[i]+=first_to_first[i][j]*first_X[j];
-            for(int i=0;i<n;i++)first_data[i].push(sigma(first_Y[i]));
+            for(int i=0;i<n;i++)first_data[i].push(tanh(first_Y[i]));
             n=OUTPUT_NUMBER,m=FIRST_NUMBER;
             output_data=0;
             for(int i=0;i<n;i++)for(int j=0;j<m;j++)output_data+=first_to_output[i][j]*first_X[j];
